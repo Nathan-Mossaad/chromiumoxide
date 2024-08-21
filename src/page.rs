@@ -7,8 +7,8 @@ use futures::{stream, SinkExt, StreamExt};
 
 use chromiumoxide_cdp::cdp::browser_protocol::dom::*;
 use chromiumoxide_cdp::cdp::browser_protocol::emulation::{
-    MediaFeature, SetEmulatedMediaParams, SetGeolocationOverrideParams, SetLocaleOverrideParams,
-    SetTimezoneOverrideParams,
+    MediaFeature, ResetPageScaleFactorParams, SetEmulatedMediaParams, SetGeolocationOverrideParams,
+    SetLocaleOverrideParams, SetPageScaleFactorParams, SetTimezoneOverrideParams,
 };
 use chromiumoxide_cdp::cdp::browser_protocol::network::{
     Cookie, CookieParam, DeleteCookiesParams, GetCookiesParams, SetCookiesParams,
@@ -683,6 +683,37 @@ impl Page {
         geolocation: impl Into<SetGeolocationOverrideParams>,
     ) -> Result<&Self> {
         self.execute(geolocation.into()).await?;
+        Ok(self)
+    }
+
+    /// Sets a specified page scale factor (zoom level).
+    ///
+    /// scale_factor should be between 0.25 and 5
+    ///
+    /// See https://chromedevtools.github.io/devtools-protocol/tot/Emulation/#method-setPageScaleFactor
+    ///
+    /// # Warning
+    /// This method is currently marked as experimental.
+    ///
+    /// # Note
+    /// Setting a scale factor currently only works in Chrome headless.
+    pub async fn set_page_scale_factor(&self, scale_factor: impl Into<f64>) -> Result<&Self> {
+        self.execute(SetPageScaleFactorParams::new(scale_factor.into()))
+            .await?;
+        Ok(self)
+    }
+
+    /// Requests that page scale factor is reset to initial values (standard zoom level).
+    ///
+    /// See https://chromedevtools.github.io/devtools-protocol/tot/Emulation/#method-resetPageScaleFactor
+    ///
+    /// # Warning
+    /// This method is currently marked as experimental.
+    ///
+    /// # Note
+    /// Setting a scale factor currently only works in Chrome headless.
+    pub async fn reset_page_scale_factor(&self) -> Result<&Self> {
+        self.execute(ResetPageScaleFactorParams::default()).await?;
         Ok(self)
     }
 
